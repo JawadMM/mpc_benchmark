@@ -55,7 +55,10 @@ class ComprehensiveMPCAnalysis:
 
     def load_and_prepare_data(self):
         """Load and prepare all CSV data"""
-        return self.data_manager.load_and_prepare_data()
+        data = self.data_manager.load_and_prepare_data()
+        if data is not None:
+            data = self.data_manager.preprocess_data_for_mpc(data)
+        return data
 
     def run_single_simulation(self, building_data, weather_data, building_name, weather_name):
         """Run MPC simulation for single building-weather combination"""

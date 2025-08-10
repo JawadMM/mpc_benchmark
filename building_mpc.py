@@ -289,7 +289,7 @@ class BuildingEnergyMPC:
                 fun=self.objective_function,
                 x0=initial_guess,
                 args=(current_state, weather_forecast, occupancy_forecast),
-                method='SLSQP', # ???
+                method='SLSQP',
                 bounds=bounds,
                 constraints=constraints,
                 options={'maxiter': 100, 'ftol': 1e-6}
@@ -401,13 +401,14 @@ class BuildingEnergyMPC:
                 # Weather forecast (using available forecast data)
                 weather_row = weather_data.iloc[forecast_time]
                 weather_forecast.append({
-                    'temperature': weather_row['Outdoor Drybulb Temperature (C)'],
-                    'humidity': weather_row['Outdoor Relative Humidity (%)'],
-                    'solar_radiation': weather_row.get('Direct Solar Radiation (W/m2)', 0)
+                    'temperature': weather_row['outdoor_dry_bulb_temperature'],
+                    'humidity': weather_row['outdoor_relative_humidity'],
+                    'solar_radiation': weather_row.get('direct_solar_irradiance', 0)
                 })
                 
                 # Occupancy forecast (from building data)
-                building_row = building_data.iloc[forecast_time]
+                building_forecast_time = min(current_time + h, len(building_data) - 1)
+                building_row = building_data.iloc[building_forecast_time]
                 occupancy_forecast.append(building_row['occupant_count'])
             
             # Solve MPC optimization
@@ -462,13 +463,13 @@ class BuildingEnergyMPC:
         
         return results
     
-    def analyze_results(self, results: Dict) -> None:
+    def analyze_results(self, results: Dict) -> Dict:
         """
         Analyze and display MPC simulation results
         """
         if not results['time']:
             print("No results to analyze")
-            return
+            return {}
         
         # Convert to arrays for easier analysis
         time = np.array(results['time'])
