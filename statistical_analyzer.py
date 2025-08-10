@@ -638,7 +638,7 @@ class StatisticalAnalyzer:
         categories = ['Excellent', 'Good', 'Minimum']
         cost_targets = [targets[cat.lower()]['cost_threshold'] for cat in categories]
         
-        bars = ax1.bar(categories, cost_targets, color=['gold', 'silver', 'bronze'], alpha=0.7)
+        bars = ax1.bar(categories, cost_targets, color=['gold', 'silver', '#CD7F32'], alpha=0.7)
         ax1.set_title('RL Cost Performance Targets')
         ax1.set_ylabel('Annual Cost Threshold ($)')
         ax1.grid(True, alpha=0.3)
