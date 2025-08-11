@@ -367,19 +367,43 @@ class ChartGenerator:
         
         # Cumulative cost comparison
         ax4 = axes[1, 1]
-        if 'energy_cost' in mpc_data:
-            mpc_cum_cost = np.cumsum(mpc_data['energy_cost'])
+
+        # Try different possible cost data keys
+        mpc_cost_data = None
+        baseline_cost_data = None
+
+        # Check for various cost data formats
+        for cost_key in ['energy_cost_sar', 'energy_cost', 'cost']:
+            if cost_key in mpc_data and mpc_data[cost_key]:
+                mpc_cost_data = mpc_data[cost_key]
+                break
+
+        for cost_key in ['energy_cost_sar', 'energy_cost', 'cost']:
+            if cost_key in baseline_data and baseline_data[cost_key]:
+                baseline_cost_data = baseline_data[cost_key]
+                break
+
+        if mpc_cost_data:
+            mpc_cum_cost = np.cumsum(mpc_cost_data)
             ax4.plot(time_hours, mpc_cum_cost, 'b-', label='MPC', linewidth=2)
             
-            if 'energy_cost' in baseline_data:
-                baseline_cum_cost = np.cumsum(baseline_data['energy_cost'])
+            if baseline_cost_data:
+                baseline_cum_cost = np.cumsum(baseline_cost_data)
                 ax4.plot(time_hours, baseline_cum_cost, 'r--', label='Baseline', alpha=0.8)
             
-            ax4.set_ylabel('Cumulative Cost ($)')
+            ax4.set_ylabel('Cumulative Cost')
             ax4.set_xlabel('Time (hours)')
             ax4.set_title('Cumulative Energy Cost')
             ax4.legend()
             ax4.grid(True, alpha=0.3)
+        else:
+            # Debug: Show what keys are actually available
+            available_keys = list(mpc_data.keys()) if mpc_data else []
+            ax4.text(0.5, 0.5, f'Available keys:\n{available_keys[:5]}...', 
+                    ha='center', va='center', transform=ax4.transAxes, fontsize=8)
+            ax4.set_title('Cumulative Energy Cost: Debug Info')
+            ax4.set_xlabel('Time (hours)')
+            ax4.set_ylabel('Cost')
         
         plt.tight_layout()
         plt.savefig(f'{chart_dir}/{season_name.lower()}_detailed.png', dpi=300, bbox_inches='tight')
